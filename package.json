@@ -1,0 +1,14 @@
+{
+  "name": "image-manager",
+  "version": "0.0.1",
+  "description": "Manager of images on Node.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Maxim Zasorin <maximzasorin@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.13.2",
+    "mongoose": "^4.1.0"
+  }
+}
