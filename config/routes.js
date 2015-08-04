@@ -15,8 +15,10 @@ module.exports = function(app) {
 	app.get('/', home.index);
 
 	// API
-	app.get('/albums', albums.getAll);
-	app.get('/images', images.getAll);
+	app.get('/albums', albums.findAll);
+	app.get('/albums/:id', albums.findOne);
+	app.get('/albums/:id/images', images.findByAlbum);
+	app.post('/albums', albums.post);
 }
 
 

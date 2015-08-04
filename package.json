@@ -6,9 +6,21 @@
     "start": "node server.js"
   },
   "author": "Maxim Zasorin <maximzasorin@gmail.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maximzasorin/image-manager.git"
+  },
   "license": "MIT",
   "dependencies": {
+    "async": "^1.4.0",
+    "decompress": "^2.3.0",
     "express": "^4.13.2",
-    "mongoose": "^4.1.0"
+    "imagemagick": "^0.1.3",
+    "mongoose": "^4.1.0",
+    "multiparty": "^4.1.2",
+    "randomstring": "^1.0.7",
+    "recursive-readdir": "^1.2.1",
+    "shortid": "^2.2.2",
+    "unzip": "^0.1.11"
   }
 }
