@@ -6,7 +6,9 @@
 var imagemagick = require('imagemagick');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var shortid = require('shortid');
 var fs = require('fs');
+var async = require('async');
 var crypto = require('crypto');
 var path = require('path');
 var randomstring = require('randomstring');
@@ -17,14 +19,30 @@ var config = require('../../config/config.js');
  */
 
 var ImageSchema = new Schema({
-	album: { type: Schema.ObjectId, ref: 'Album' },
+	id: { type: String, unique: true, default: shortid.generate },
 	createdAt: { type: Date, default: Date.now() },
 	// compliesRes: { type: Boolean, default: true },
-	uniqueImage: { type: Boolean, default: true },
+	// uniqueImage: { type: Boolean, default: true },
 	hash: { type: String },
 	width: { type: Number },
 	height: { type: Number },
-	path: { type: String }
+	path: { type: String },
+	album: { type: Schema.ObjectId, ref: 'Album', index: true }
+});
+
+/**
+ * Middlewares
+ */
+
+ImageSchema.post('remove', function() {
+	var imagePath = config.publicDir + this.path;
+	fs.unlink(imagePath, function(err) {
+		if (err) {
+			console.log('Can not remove file', imagePath, '--', err.message);
+		} else {
+			console.log('File', imagePath, 'was removed');
+		}
+	});
 });
 
 /**
@@ -64,25 +82,55 @@ ImageSchema.statics.copyFile = function(filePath, callback) {
 };
 
 ImageSchema.statics.hashFile = function(filePath, callback) {
-	var stream = fs.createReadStream(filePath);
-	var hash = crypto.createHash('sha1');
-	hash.setEncoding('hex');
+	var shasum = crypto.createHash('sha256');
 
-	stream.on('error', function(err) {;
-		callback({ message: err.message });
-	})
-	
-	stream.on('end', function() {
-	    hash.end();
-	    callback(null, hash.read());
+	var s = fs.ReadStream(filePath);
+	s.on('data', function(d) {
+	  	shasum.update(d);
 	});
 
-	stream.pipe(hash)
+	s.on('end', function() {
+		var d = shasum.digest('hex');
+		callback(null, d);
+	});
 };
 
 /**
  * Methods
  */
+ImageSchema.methods.compliesRes = function(callback) {
+	mongoose.model('Image')
+		.findOne({ _id: this})
+		.populate('album')
+		.exec(function(err, image) {
+			if (err) {
+				callback(err);
+			} else {
+				var compliesRes = image.width <= image.album.maxWidth
+								&& image.height <= image.album.maxHeight;
+
+				callback(null, compliesRes);
+			}
+		});
+};
+
+ImageSchema.methods.isUnique = function(callback) {
+	var image = this;
+	mongoose.model('Image')
+		.findOne(
+			{
+				_id: { $ne: image._id },
+				hash: image.hash
+			}
+			, function(err, another) {
+				if (err) {
+					callback(err)
+				} else {
+					callback(null, (another == null));
+				}
+			}
+		);
+};
 
 ImageSchema.methods.fromFile = function(filePath, callback) {
 	var image = this;
@@ -104,12 +152,7 @@ ImageSchema.methods.fromFile = function(filePath, callback) {
 							callback({ message: err.message });
 						} else {
 							image.hash = hash;
-							mongoose.model('Image').findOne({ hash: hash }, function(err, another) {
-								if (another) {
-									image.uniqueImage = false;
-								}
-								callback(null);
-							});
+							callback(null);
 						}
 					});
 				}
@@ -120,9 +163,39 @@ ImageSchema.methods.fromFile = function(filePath, callback) {
 
 ImageSchema.options.toJSON = {
     transform: function(doc, ret, options) {
-        delete ret._id;
-        delete ret.__v;
-        return ret;
+    	delete ret.album;
+		delete ret._id;
+	    delete ret.__v;
+
+    	if (options.callback) {
+    		async.parallel(
+    			[
+	    			function(callback) {
+	    				doc.isUnique(function(err, isUnique) {
+			    			if (err) {
+			    				callback(err);
+			    			} else {
+			    				ret.isUnique = isUnique;
+			    				callback(null);
+			    			}
+		    			});
+		    		}
+	    			, function(callback) {
+	    				doc.compliesRes(function(err, compliesRes) {
+	    					if (err) {
+	    						options.callback(err);
+	    					} else {
+	    						ret.compliesRes = compliesRes;
+	    						callback(null);
+	    					}
+	    				});
+	    			}
+	    		]
+	    		, function(err) {
+	    			options.callback(err, ret);
+	    		}
+    		);
+    	}
     }
 };
 

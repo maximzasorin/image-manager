@@ -8,6 +8,7 @@ var Schema = mongoose.Schema;
 var shortid = require('shortid');
 var Decompress = require('decompress');
 var recursive = require('recursive-readdir');
+var rimraf = require('rimraf');
 var path = require('path');
 var async = require('async');
 var config = require('../../config/config.js');
@@ -18,8 +19,9 @@ var config = require('../../config/config.js');
 
 var AlbumSchema = new Schema({
 	id: { type: String, unique: true, default: shortid.generate },
-	name: { type: String, required: true },
+	name: { type: String, default: 'Unnamed album' },
 	createdAt: { type: Date, default: Date.now() },
+	saved: { type: Boolean, default: false },
 	maxWidth: { type: Number, default: config.image.maxWidth },
 	maxHeight: { type: Number, default: config.image.maxHeight },
 	images: [
@@ -31,8 +33,73 @@ var AlbumSchema = new Schema({
 });
 
 /**
+ * Middlewares
+ */
+AlbumSchema.pre('save', function(next) {
+	if (this.saved == true) {
+		mongoose.model('Album')
+			.findOne({ _id: this })
+			.populate('images')
+			.exec(function(err, album) {
+				var i = 0;
+				async.each(
+					album.images
+					, function(image, callback) {
+						image.compliesRes(function(err, compliesRes) {
+							if (err) {
+								callback(new Error('Cannot save. ' + err.message));
+							} else {
+								if (!compliesRes) {
+									callback(new Error('Cannot save. Album have images not complies to resolution.'));
+								} else {
+									image.isUnique(function(err, isUnique) {
+										if (err) {
+											callback(new Error('Cannot save. ' + err.message));
+										} else {
+											if (!isUnique) {
+												callback(new Error('Cannot save. Album have not unique images.'));
+											} else {
+												callback(null);
+											}
+										}
+									});
+								}
+							}
+						});
+					}
+					, function(err) {
+						next(err);
+					}
+				);
+			});
+	} else {
+		next();
+	}
+});
+
+AlbumSchema.pre('remove', function(next) {
+	mongoose.model('Album')
+		.findOne({ _id: this })
+		.populate('images')
+		.exec(function(err, album) {
+			async.each(
+				album.images
+				, function(image, callback) {
+					image.remove(function(err) {
+						callback(err);
+					});
+				}
+				, function(err) {
+					next(err);
+				}
+			);
+		});
+});
+
+/**
  * Statics
  */
+
 AlbumSchema.statics.correctExt = function(archivePath) {
 	var extensions = config.archive.extensions;
 	var ext = path.extname(archivePath).replace('.', '');
@@ -40,9 +107,32 @@ AlbumSchema.statics.correctExt = function(archivePath) {
 	return (extensions.indexOf(ext) != -1);
 };
 
+AlbumSchema.statics.removeDir = function(dirPath) {
+	rimraf(dirPath, function(err) {
+		if (err) {
+			console.error('Can not delete directory', dirPath, '--', err.message);
+		} else {
+			console.log('Directory', dirPath, 'was removed');
+		}
+	});
+};
+
 /**
  * Methods
  */
+
+AlbumSchema.methods.fromPlain = function(plain) {
+	var paths = [ // modified paths
+		'name', 'saved', 'maxHeight', 'maxWidth'
+	];
+	var album = this;
+
+	paths.forEach(function(path) {
+		if (plain[path]) {
+			album[path] = plain[path];
+		}
+	});
+};
 
 AlbumSchema.methods.parseImages = function(archive, callback) {
 	var album = this;
@@ -53,13 +143,13 @@ AlbumSchema.methods.parseImages = function(archive, callback) {
 		if (!this.constructor.correctExt(archive.path)) {
 			callback({ message: 'Not supported archive type.' })
 		} else {
-			album.extractArchive(archive, function(err, dirname) {
+			album.extractArchive(archive, function(err, extractDir) {
 				if (err) {
-					// remove directory
+					mongoose.model('Album').removeDir(extractDir);
 					callback({ message: 'Can not extract archive.' });
 				} else {
-					album.pushImages(dirname, function(err) {
-						// remove directory
+					album.pushImages(extractDir, function(err) {
+						mongoose.model('Album').removeDir(extractDir);
 						if (err) {
 							callback({ message: err.message });
 						} else {
@@ -81,7 +171,7 @@ AlbumSchema.methods.extractArchive = function(archive, callback) {
 	var archiveName = archivePath.base.replace(archivePath.ext, '');
 	var extractDir = archivePath.dir + '/' + archiveName;
 
-	console.log(archive.path, 'to', extractDir);
+	console.log('Extract', archive.path, 'to', extractDir);
 	var decompress = new Decompress;
 
 	// only zip while :(
@@ -111,12 +201,14 @@ AlbumSchema.methods.pushImages = function(dirname, callback) {
 					var Image = mongoose.model('Image');
 					if (Image.correctExt(filePath)) {
 						var image = new Image;
+						image.album = album;
+
 						image.fromFile(filePath, function(err) {
 							if (err) {
 								// incorrect image file
 								callback();
 							} else {
-								image.save();
+								image.save(); // callback?
 								album.images.push(image);
 								callback();
 							}

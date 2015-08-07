@@ -5,6 +5,7 @@
 
 var express = require('express');
 var path = require('path');
+var bodyParser = require('body-parser');
 
 /**
  * Expose
@@ -22,7 +23,8 @@ module.exports = function(app) {
 		next();
 	});
 
-	console.log(path.normalize(__dirname + '/../public'));
+	app.use(bodyParser.urlencoded({extended: false}));
+	app.use(bodyParser.json());
 
 	app.use(express.static(path.normalize(__dirname + '/../public')));
 }
