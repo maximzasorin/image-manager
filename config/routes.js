@@ -3,6 +3,9 @@
  * Module dependencies
  */
 
+var express = require('express')
+var api = express.Router();
+
 var home = require('../app/controllers/home.js');
 var albums = require('../app/controllers/albums.js');
 var images = require('../app/controllers/images.js');
@@ -15,16 +18,18 @@ module.exports = function(app) {
 	app.get('/', home.index);
 
 	// API
-	app.get('/albums', albums.findAll);
-	app.get('/albums/:id', albums.findOne);
-	app.get('/albums/:id/images', images.findByAlbum);
-	app.post('/albums/:id/images', images.addToAlbum);
-	app.post('/albums', albums.post);
-	app.put('/albums/:id', albums.put);
-	app.delete('/albums/:id', albums.delete);
+	api.get('/albums', albums.findAll);
+	api.get('/albums/:id', albums.findOne);
+	api.get('/albums/:id/images', images.findByAlbum);
+	api.post('/albums/:id/images', images.addToAlbum);
+	api.post('/albums', albums.post);
+	api.put('/albums/:id', albums.put);
+	api.delete('/albums/:id', albums.delete);
 
-	app.get('/images/:id', images.findOne);
-	app.delete('/images/:id', images.delete);
+	api.get('/images/:id', images.findOne);
+	api.delete('/images/:id', images.delete);
+
+	app.use('/api/v1', api);
 }
 
 
