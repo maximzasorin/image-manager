@@ -232,8 +232,11 @@ AlbumSchema.methods.pushImages = function(dirname, callback) {
 
 AlbumSchema.options.toJSON = {
     transform: function(doc, ret, options) {
-    	ret.countImages = ret.images.length;
+    	if (ret.images) {
+    		ret.countImages = ret.images.length;
+    	}
     	delete ret.images;
+    	
         delete ret._id;
         delete ret.__v;
         return ret;

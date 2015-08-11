@@ -13,6 +13,10 @@ exports.findOne = function(req, res) {
 	var imageId = req.params.id;
 	Image
 		.findOne({ id: imageId })
+		.populate({
+			path: 'album',
+			select: 'id name'
+		})
 		.exec(function(err, image) {
 			if (err) {
 				res.sendError(400, err.message);
@@ -23,7 +27,8 @@ exports.findOne = function(req, res) {
 					image.toJSON({
 						callback: function(err, ret) {
 							res.send(ret);
-						}
+						},
+						keepAlbum: true
 					});
 				}
 			}

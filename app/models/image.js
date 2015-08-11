@@ -163,11 +163,15 @@ ImageSchema.methods.fromFile = function(filePath, callback) {
 
 ImageSchema.options.toJSON = {
     transform: function(doc, ret, options) {
-    	delete ret.album;
+    	delete ret.hash;
 		delete ret._id;
 	    delete ret.__v;
 
-    	if (options.callback) {
+	    if (!options.keepAlbum) {
+	    	delete ret.album;
+	    }
+
+	    if (options.callback) {
     		async.parallel(
     			[
 	    			function(callback) {
