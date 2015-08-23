@@ -1,0 +1,31 @@
+<div class="album">
+	<form class="album-form album-form_edit">
+		<h2 class="album__header">
+			<a href="#/albums/{{ album.id }}">{{ album.name }}</a>
+		</h2>
+		<h3>Edit Album</h3>
+		<div class="form-group">
+			<label class="album-form__label control-label" for="name-field">Name:</label>
+			<input type="text" class="form-control" id="name-field" ng-model="album.name" />
+		</div>
+		<div class="form-group">
+			<label class="album-form__label control-label" for="width-field">Max Width (px):</label>
+			<input type="text" class="form-control" id="width-field" ng-model="album.maxWidth" />
+		</div>
+		<div class="form-group">
+			<label class="album-form__label control-label" for="height-field">Max Height (px):</label>
+			<input type="text" class="form-control" id="height-field" ng-model="album.maxHeight" />
+		</div>
+		<div class="album-form__footer form-footer form-group">
+	 		<button type="submit" class="btn btn-default" ng-click="saveAlbum()">Save</button>
+		</div>
+		<div class="form-group">
+			<label class="album-form__label control-label" for="height-field">Images:</label>
+			<div class="album__images">
+				<div class="image" ng-class="{ image_warning: (!image.compliesRes || !image.isUnique) }" ng-repeat="image in images">
+					<a href="#/images/{{ image.id }}"><img class="image__img" ng-src="{{ image.path }}" /></a>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>

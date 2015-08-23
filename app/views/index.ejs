@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="imageManager">
+	<head>
+		<title>Image Manager</title>
+
+		<!-- bower_components -->
+		<script src="/bower_components/jquery/dist/jquery.min.js"></script>
+		<script src="/bower_components/angular/angular.min.js"></script>
+		<script src="/bower_components/angular-resource/angular-resource.min.js"></script>
+		<script src="/bower_components/angular-route/angular-route.min.js"></script>
+		<script src="/bower_components/ng-file-upload/ng-file-upload.min.js"></script>
+		<script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css" />
+		<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap-theme.css" />
+		<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap-theme.css" />
+
+		<!-- Angular App -->
+		<script src="/js/app.js"></script>
+		
+		<script src="/js/controllers/main.js"></script>
+		<script src="/js/controllers/album-edit.js"></script>
+		<script src="/js/controllers/album-list.js"></script>
+		<script src="/js/controllers/album-create.js"></script>
+		<script src="/js/controllers/album.js"></script>
+		<script src="/js/controllers/image.js"></script>
+
+		<script src="/js/models/album.js"></script>
+		<script src="/js/models/image.js"></script>
+		<script src="/js/models/images.js"></script>
+
+		<link rel="stylesheet" href="/css/main.css" />
+	</head>
+	<body ng-controller="MainController">
+		<nav class="navbar navbar-default">
+			<div class="container">
+				<div class="navbar-header">
+					<div class="navbar-brand">
+						<a href="#/">Image Manager</a>
+					</div>
+				</div>
+				<div class="collapse navbar-collapse">
+					<ul class="nav navbar-nav">
+						<li ng-class="{ active: isActive('/albums')}">
+							<a href="#/albums">Albums</a>
+						</li>
+						<li ng-class="{ active: isActive('/albums/create')}">
+							<a href="#/albums/create">Create Album</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+		<div class="container">
+			<div ng-view="ng-view"></div>
+		</div>
+	</body>
+</html>

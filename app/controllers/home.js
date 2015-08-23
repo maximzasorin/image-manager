@@ -1,6 +1,6 @@
 
 exports.index = function(req, res) {
-	res.send('image-manager');
+	res.render('index');
 }
 
 

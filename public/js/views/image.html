@@ -1,0 +1,13 @@
+<div class="image image_full">
+	<h2 class="image__header">
+		<a href="#/albums/{{image.album.id}}">{{image.album.name}}</a> — {{ image.id }}
+	</h2>
+	<div class="image__info">
+		<div>Resolution: {{ image.width }}x{{ image.height }}px</div>
+		<div>Complies album res.: {{ image.compliesRes }}</div>
+		<div>Unique: {{ image.isUnique }}</div>
+	</div>
+	<div class="image__img-wrapper">
+		<img class="image__img image__img_full" ng-src="{{ image.path }}" />
+	</div>
+</div>

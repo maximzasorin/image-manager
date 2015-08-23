@@ -1,0 +1,50 @@
+<div class="album" ng-show="album">
+	<h2 class="album__name">
+		{{ album.name }}
+
+		<span class="album__options">
+			<button class="btn btn-default btn-sm" ng-click="editAlbum()">
+				<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+			</button>
+			<button class="btn btn-default btn-sm" ng-click="deleteAlbum()">
+				<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+			</button>
+		</span>
+	</h2>
+	<div class="album__info">
+		<div>Max. resolution: {{ album.maxWidth }}x{{ album.maxHeight }}px</div>
+		<div>Count of images: {{ album.countImages }}</div>
+		<div>Created: {{ album.createdAt | date : 'dd MMM yy' }}</div>
+	</div>
+	<div class="album__images">
+		<div class="image" ng-class="{ image_warning: (!image.compliesRes || !image.isUnique) }" ng-repeat="image in images">
+			<a href="#/images/{{ image.id }}"><img class="image__img" ng-src="{{ image.path }}" /></a>
+		</div>
+	</div>
+</div>
+
+<div class="album-error alert alert-danger" role="alert" ng-show="error">
+	<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+	<span class="sr-only">Error:</span>
+	{{ error.message }}
+</div>
+
+<div class="album-deleting modal fade">
+ 	<div class="modal-dialog">
+    	<div class="modal-content">
+	    	<div class="modal-header">
+	        	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        	<h4 class="modal-title">Deleting album</h4>
+      		</div>
+      		<div class="modal-body">
+        		<p>Are you sure?</p>
+      		</div>
+      		<div class="modal-footer">
+        		<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        		<button type="button" class="btn btn-danger" ng-click="deleteAlbum(true)">Yes</button>
+      		</div>
+    	</div>
+  	</div>
+</div>
+
+

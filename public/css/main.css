@@ -1,0 +1,35 @@
+
+.container { width: 800px; }
+
+/**
+ * .album
+*/
+.album { margin-bottom: 50px; }
+.album__name {}
+.album__info { margin-bottom: 20px; }
+.album__images { width: 800px; margin-left: -15px; }
+.album__options { /*font-size: 17px;*/ margin-left: 10px; }
+
+/**
+ * .image
+*/
+.image { display: inline-block; width: 180px; margin: 10px; padding: 10px; }
+.image_warning { background: #FF9A9A; }
+.image_full { width: 100%; margin: 0; padding: 0; margin-bottom: 50px; }
+
+.image__img { width: 160px; }
+.image__img_full { width: auto; max-width: 770px; }
+.image__img-wrapper { text-align: center; }
+.image__header {  }
+.image__info { margin-bottom: 20px; }
+
+/**
+ * .album-form
+ */
+
+.album-form { width: 500px; margin: 0 auto; }
+.album-form_edit { width: auto; }
+.album-form__label { text-align: left; }
+.album-form__footer { text-align: right; }
+
+
