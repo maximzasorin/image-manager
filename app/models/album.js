@@ -129,7 +129,11 @@ AlbumSchema.methods.fromPlain = function(plain) {
 
 	paths.forEach(function(path) {
 		if (plain[path]) {
-			album[path] = plain[path];
+			if (Array.isArray(plain[path])) {
+				album[path] = plain[path][0];
+			} else {
+				album[path] = plain[path];
+			}
 		}
 	});
 };

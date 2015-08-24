@@ -44,13 +44,13 @@ exports.post = function(req, res) {
 	    	res.sendError(err.status, err.message);
 	    } else {
 	    	var archive = files.archive;
-	    	var name = fields.name;
 
 	    	if (!archive) {
 		    		res.sendError(400, 'File field not provided.');
 	    	} else {
     			var album = new Album;
-    			album.name = name;
+    			album.fromPlain(fields);
+    			
     			album.parseImages(archive[0], function(err) {
     				fs.unlink(archive[0].path, function(err) {
     					if (err) {
