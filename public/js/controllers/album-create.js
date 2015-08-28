@@ -20,12 +20,11 @@ imageManager
 			    .progress(
 			    	function(evt) {
 			        	$scope.uploadProgress = parseInt(100.0 * evt.loaded / evt.total);
-			        	console.log($scope.uploadProgress);
 		        	}
 		        )
 		        .success(
 		        	function(data, status, headers, config) {
-			            $location.path('/albums/' + data.id);
+			            $location.path('/albums/' + data.data.id);
 			            $scope.uploadProgress = null;			        
 		        	}
 		        )
